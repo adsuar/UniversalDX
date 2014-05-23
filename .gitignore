@@ -1,0 +1,10 @@
+*~
+\#*#
+/build/
+.settings/
+.externalToolBuilders/
+.*.swp
+.classpath
+.project
+/bin/
+/target/
