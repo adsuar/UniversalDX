@@ -34,3 +34,8 @@ c) Default execution (with the Naive Bayes classifier): ant run
 
 
 NOTE: With the current test data, we can see a poor performance of SVM versus Naive Bayes (if type is C-classification of is nu-classification an the value of nu is for example 0.5) since the data used is stored as is in the training set and the predictions of SVM are wrong.
+
+R Source Code
+=============
+
+Instead of creating two functions that trained the classifier in one hand, and predicted the result on the other hand, I've developed a third function focused on loading data, so I could reuse such functionality whenever were needed.

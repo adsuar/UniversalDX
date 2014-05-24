@@ -38,7 +38,7 @@
 		<mkdir dir="${dist.home}" />
 	</target>
 
-	<target name="compile" depends="prepare" description="Compile Java sources and copy to WEB-INF/classes dir">
+	<target name="compile" depends="prepare" description="Compile Java sources and copy to dist dir">
 		<javac srcdir="${src.home}" destdir="${dist.home}/">
 			<classpath refid="compile.classpath" />
 		</javac>

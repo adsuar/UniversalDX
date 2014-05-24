@@ -26,6 +26,15 @@ public class RClassifier {
 
 	// Base Folder
 	private String baseFolder;
+	
+	// Input training data
+	private String inputTrainingData;
+	
+	// Test data
+	private String testData;
+
+	// R Library
+	private String RLibrary;
 
 	// Classifier to apply
 	private CLASSIFIER classifier;
@@ -52,6 +61,9 @@ public class RClassifier {
 		}
 
 		baseFolder = properties.getProperty("baseFolder");
+		inputTrainingData = properties.getProperty("inputTrainingData");
+		testData = properties.getProperty("testData");
+		RLibrary = properties.getProperty("RLibrary");
 
 		// Create the connection to the RServer
 		c = new RConnection();
@@ -83,10 +95,10 @@ public class RClassifier {
 		Logging.info(getHeader() + "Loading my R library.");
 		// Setting the name of the my R library
 		String file = FileUtils.readFile(baseFolder
-				+ "/resources/R/RClassifier.R");
+				+ RLibrary);
 
 		// Setting the name of the file where corpus is stored in R
-		c.assign("corpusFile", baseFolder + "/resources/data/leaf.csv");
+		c.assign("corpusFile", baseFolder + inputTrainingData);
 
 		System.out.println("Corpus File Name stated");
 		// System.out.println(c.eval("corpusFile").asString());
@@ -148,7 +160,7 @@ public class RClassifier {
 		Logging.info(getHeader() + "Classify a new entry.");
 
 		REXP x = c.eval("testCorpus <- loadCorpus(\"" + baseFolder
-				+ "/resources/data/test.csv\")");
+				+ testData + "\")");
 
 		x = c.eval("dim(testCorpus)");
 
