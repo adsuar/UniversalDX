@@ -49,4 +49,4 @@ Instead of creating just two functions that trained the classifier in one hand, 
 
 I have taken advantage of the fact that while the connection is opened, no data is lost (the session data is stored) so I can develop lighter functions.
 
-The code is at: resources/R/RClassifier.R
+The code is at: **resources/R/RClassifier.R**
