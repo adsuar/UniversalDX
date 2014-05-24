@@ -12,6 +12,15 @@ import org.rosuda.REngine.Rserve.RserveException;
 import es.adsuar.utils.FileUtils;
 import es.adsuar.utils.Logging;
 
+/**
+ * Main class of the RClassifier project. The main purpose of this class is to
+ * connect to the Rserve daemon and execute the rutines stored at
+ * resources/R/RClassifier.R to predict to which class belongs to a data set.
+ * 
+ * @author Antonio Jesús Adsuar Gómez
+ * 
+ */
+
 public class RClassifier {
 	// Enum that contains the different classifiers we understand right now.
 	public enum CLASSIFIER {
@@ -192,18 +201,18 @@ public class RClassifier {
 		 * 
 		 * Thus, we have to preserve the names.
 		 */
-		
+
 		// We get the name the name of the columns from the training data set
 		// that will be used at the prediction.
 		String columns = "";
-		for(int i=1;i <= maxSize;i++) {
-			if(i != cPosition) {
-				if(columns.length() != 0)
+		for (int i = 1; i <= maxSize; i++) {
+			if (i != cPosition) {
+				if (columns.length() != 0)
 					columns += ",";
 				columns += "'V" + i + "'";
 			}
 		}
-		
+
 		Logging.info(getHeader() + "The columns to be used are: " + columns);
 
 		// We set which will be the names of the columns
