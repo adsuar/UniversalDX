@@ -1,20 +1,16 @@
 package es.adsuar.universaldx;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
-import org.rosuda.REngine.REXPVector;
 import org.rosuda.REngine.Rserve.RConnection;
 import org.rosuda.REngine.Rserve.RserveException;
 
 import es.adsuar.utils.FileUtils;
-import es.adsuar.utils.RUtils;
 import es.adsuar.utils.Logging;
 
 public class RClassifier {
@@ -95,11 +91,6 @@ public class RClassifier {
 		Logging.info(getHeader() + "Loading corpus data.");
 
 		REXP x = c.eval("corpus <- loadCorpus(corpusFile)");
-		// x = c.eval("corpus");
-
-		// for (Object i : x.asList()) {
-		// System.out.println(((REXPVector) i).asStrings()[0]);
-		// }
 
 		Logging.info(getHeader() + "Corpus data loaded.");
 	}
@@ -128,30 +119,30 @@ public class RClassifier {
 			throws RserveException, REXPMismatchException {
 		Logging.info(getHeader() + "Classify a new entry.");
 
-		/*PrintWriter out = null;
-
-		try {
-			out = new PrintWriter(
-					"/home/adsuar/workspace/trabajo/UniversalDX/resources/data/test.csv");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		out.println(RUtils.List2RCSV(objectToClassify));
-
-		out.close();*/
+		/*
+		 * PrintWriter out = null;
+		 * 
+		 * try { out = new PrintWriter(
+		 * "/home/adsuar/workspace/trabajo/UniversalDX/resources/data/test.csv"
+		 * ); } catch (FileNotFoundException e) { // TODO Auto-generated catch
+		 * block e.printStackTrace(); }
+		 * 
+		 * out.println(RUtils.List2RCSV(objectToClassify));
+		 * 
+		 * out.close();
+		 */
 
 		REXP x = c
 				.eval("testCorpus <- loadCorpus(\"/home/adsuar/workspace/trabajo/UniversalDX/resources/data/test.csv\")");
 
 		x = c.eval("prediction <- classify(trained,testCorpus[,-1])");
 		x = c.eval("prediction");
-		
-		for(int factor = 0; factor < x.asFactor().size(); factor++) {
-			System.out.println("LA PREDICCIÓN PARA LA ENTRADA " + factor + " ES " + x.asFactor().at(factor));
+
+		for (int factor = 0; factor < x.asFactor().size(); factor++) {
+			System.out.println("LA PREDICCIÓN PARA LA ENTRADA " + factor
+					+ " ES " + x.asFactor().at(factor));
 		}
-		
+
 		Logging.info(getHeader() + "New entry classified.");
 	}
 
@@ -169,6 +160,8 @@ public class RClassifier {
 	}
 
 	/**
+	 * Method that launches the training and classification tasks.
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
