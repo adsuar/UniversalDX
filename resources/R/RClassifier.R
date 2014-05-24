@@ -17,7 +17,9 @@ trainClassifierNB <- function(corpus) {
 # Function that trains the Support Vector Machines classifier
 trainClassifierSVM <- function(corpus) {
    # The class column should be categorical, not numeric.
-   classifier <- svm(corpus[,2:16],as.factor(corpus[,1]))
+   # Poor performance
+   # classifier <- svm(corpus[,2:16],as.factor(corpus[,1]))
+   classifier <- svm(corpus[,2:16],as.factor(corpus[,1]),type="nu-classification",nu = 0.2)
    return(classifier)
 }
 

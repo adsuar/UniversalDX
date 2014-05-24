@@ -27,4 +27,4 @@ b) Execution with Support Vector Machines classifier: ant runSVM
 c) Default execution (with the Naive Bayes classifier): ant run
 
 
-NOTE: With the current test data, we can see a poor performance of SVM versus Naive Bayes since the data used is stored as is in the training set and the preditions of SVM are wrong.
+NOTE: With the current test data, we can see a poor performance of SVM versus Naive Bayes (if type is C-classification of is nu-classification an the value of nu is for example 0.5) since the data used is stored as is in the training set and the predictions of SVM are wrong.
