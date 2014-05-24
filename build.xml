@@ -4,6 +4,7 @@
 	<property name="libs.home" value="${basedir}/lib" />
 	<property name="dist.home" value="${basedir}/dist" />
 	<property name="src.home" value="${basedir}/src" />
+	<property name="bin.home" value="${basedir}/bin" />
 
 	<target name="help">
 		<echo>You can use the following targets:</echo>
@@ -12,8 +13,11 @@
 		<echo>  help    : (default) Prints this message </echo>
 		<echo>  all     : Cleans, compiles, and packages application</echo>
 		<echo>  clean   : Deletes work directories</echo>
-		<echo>  compile : Compiles servlets into class files</echo>
-		<echo>  dist    : Packages artifacts into a deployable WAR</echo>
+		<echo>  compile : Compiles the project.</echo>
+		<echo>  dist    : Create JAR file of the project.</echo>
+		<echo>  run     : Execute the prediction process with Naive Bayes classifier.</echo>
+		<echo>  runNB   : Execute the prediction process with Naive Bayes classifier.</echo>
+		<echo>  runSVM  : Execute the prediction process with Support Vector Machines classifier.</echo>
 		<echo>
 		</echo>
 		<echo>For example, to clean, compile, and package all at once, run:</echo>
@@ -28,10 +32,11 @@
 		<pathelement location="${libs.home}" />
 	</path>
 
-	<target name="all" depends="clean,compile,dist,run" description="Clean work dirs, then compile and create a WAR" />
+	<target name="all" depends="clean,compile,dist,run" description="Clean work dirs, then compile and execute the task." />
 
-	<target name="clean" description="Delete old work and dist directories">
+	<target name="clean" description="Delete old work and temporary directories">
 		<delete dir="${dist.home}" />
+		<delete dir="${bin.home}" />
 	</target>
 
 	<target name="prepare" depends="clean" description="Create working dirs and copy static files to work dir">
