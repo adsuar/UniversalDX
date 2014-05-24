@@ -54,4 +54,18 @@
 		</java>
 	</target>
 
+	<target name="runNB" depends="dist" description="Executes the training and classification.">
+		<java classname="es.adsuar.universaldx.RClassifier" classpath="./dist" fork="true" taskname="java1.6">
+			<classpath refid="compile.classpath" />
+			<arg value="--NB" />
+		</java>
+	</target>
+
+	<target name="runSVM" depends="dist" description="Executes the training and classification.">
+		<java classname="es.adsuar.universaldx.RClassifier" classpath="./dist" fork="true" taskname="java1.6">
+			<classpath refid="compile.classpath" />
+			<arg value="--SVM" />
+		</java>
+	</target>
+
 </project>

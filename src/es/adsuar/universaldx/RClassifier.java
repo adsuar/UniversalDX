@@ -13,6 +13,10 @@ import es.adsuar.utils.FileUtils;
 import es.adsuar.utils.Logging;
 
 public class RClassifier {
+	// Enum that contains the different classifiers we understand right now.
+	public enum CLASSIFIER {
+		NB, SVM
+	}
 
 	// Connector to the RServer
 	RConnection c;
@@ -23,11 +27,17 @@ public class RClassifier {
 	// Base Folder
 	private String baseFolder;
 
+	// Classifier to apply
+	private CLASSIFIER classifier;
+
 	/**
 	 * Class constructor
 	 */
 	public RClassifier() throws RserveException, REXPMismatchException {
 		Logging.info(getHeader() + "Loading class.");
+
+		// Initialization of classifier
+		classifier = null;
 
 		// Later I'll use property files.
 
@@ -109,7 +119,20 @@ public class RClassifier {
 	public void trainClassifier() throws RserveException, REXPMismatchException {
 		Logging.info(getHeader() + "Training classifier.");
 
-		c.eval("trained <- trainClassifier(corpus)");
+		switch (classifier) {
+		case NB:
+			Logging.info(getHeader() + " Training made with NB classifier.");
+			c.eval("trained <- trainClassifierNB(corpus)");
+			break;
+		case SVM:
+			Logging.info(getHeader() + " Training made with SVM classifier.");
+			c.eval("trained <- trainClassifierSVM(corpus)");
+			break;
+		default:
+			Logging.info(getHeader() + " Training made with NB classifier.");
+			c.eval("trained <- trainClassifierNB(corpus)");
+			break;
+		}
 
 		Logging.info(getHeader() + "Classifier trained.");
 	}
@@ -128,17 +151,20 @@ public class RClassifier {
 				+ "/resources/data/test.csv\")");
 
 		x = c.eval("dim(testCorpus)");
-		
+
 		REXP y = c.eval("dim(corpus)");
-		
-		if(Integer.parseInt(x.asStrings()[1]) > (Integer.parseInt(y.asStrings()[1]) - 1)) {
-			System.err.println("The test corpus has more columns than the training set.");
-			throw new RserveException(c,"The test corpus has more columns than the training set.");
+
+		if (Integer.parseInt(x.asStrings()[1]) > (Integer.parseInt(y
+				.asStrings()[1]) - 1)) {
+			System.err
+					.println("The test corpus has more columns than the training set.");
+			throw new RserveException(c,
+					"The test corpus has more columns than the training set.");
 		}
-		
+
 		/**
-		 * As it is stated at the naiveBayes help, note that the column names
-		 * of ‘newdata’ are matched against the training data ones.".
+		 * As it is stated at the naiveBayes help, note that the column names of
+		 * ‘newdata’ are matched against the training data ones.".
 		 * 
 		 * Thus, we have to preserve the names.
 		 */
@@ -167,12 +193,53 @@ public class RClassifier {
 	}
 
 	/**
+	 * Method that gets the current classifier.
+	 * 
+	 * @return Current classifier.
+	 */
+	public CLASSIFIER getClassifier() {
+		return classifier;
+	}
+
+	/**
+	 * Method that instantiates a new classifier.
+	 * 
+	 * @param classifier
+	 *            New classifier to use.
+	 */
+	public void setClassifier(CLASSIFIER classifier) {
+		this.classifier = classifier;
+	}
+
+	/**
 	 * Method that launches the training and classification tasks.
 	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		CLASSIFIER classifier = null;
+
 		RClassifier rc = null;
+
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].indexOf("=") != -1) {
+				String option[] = args[i].split("=");
+
+				if (option[0].equals("-knowledgeFiles")) {
+					// knowledgeFiles = option[1];
+				}
+			} else {
+				if (args[i].equals("--NB")) {
+					classifier = CLASSIFIER.NB;
+				} else if (args[i].equals("--SVM")) {
+					classifier = CLASSIFIER.SVM;
+				}
+			}
+		}
+
+		// The default classifier is NB
+		if (classifier == null)
+			classifier = CLASSIFIER.NB;
 
 		/**
 		 * We establish the connection.
@@ -186,6 +253,9 @@ public class RClassifier {
 			System.err.println("The connection hasn't been stablished.");
 			System.exit(-1);
 		}
+
+		// We set the classifier.
+		rc.setClassifier(classifier);
 
 		/**
 		 * We load the corpus into the environment.

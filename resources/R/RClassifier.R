@@ -8,9 +8,16 @@ loadCorpus <- function(fileName) {
 }
 
 # Function that trains the Naive Bayes classifier
-trainClassifier <- function(corpus) {
+trainClassifierNB <- function(corpus) {
    # The class column should be categorical, not numeric.
    classifier <- naiveBayes(corpus[,2:16],as.factor(corpus[,1]))
+   return(classifier)
+}
+
+# Function that trains the Support Vector Machines classifier
+trainClassifierSVM <- function(corpus) {
+   # The class column should be categorical, not numeric.
+   classifier <- svm(corpus[,2:16],as.factor(corpus[,1]))
    return(classifier)
 }
 
