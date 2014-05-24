@@ -6,8 +6,8 @@ Task developed for the job position process.
 Requirements
 ------------
 
-OS: Linux
-JVM: 1.6
+- OS: Linux
+- JVM: 1.6
 
 Training Data
 -------------
