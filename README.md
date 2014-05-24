@@ -3,6 +3,12 @@ UniversalDX
 
 Task developed for the job position process.
 
+REQUIREMENTS
+============
+
+OS: Linux
+JVM: 1.6
+
 Packages to Install
 ===================
 
