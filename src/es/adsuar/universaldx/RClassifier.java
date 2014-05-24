@@ -1,8 +1,7 @@
 package es.adsuar.universaldx;
 
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 
 import org.rosuda.REngine.REXP;
@@ -19,7 +18,10 @@ public class RClassifier {
 	RConnection c;
 
 	// Properties of the project
-	// private static Properties properties;
+	private static Properties properties;
+
+	// Base Folder
+	private String baseFolder;
 
 	/**
 	 * Class constructor
@@ -28,14 +30,18 @@ public class RClassifier {
 		Logging.info(getHeader() + "Loading class.");
 
 		// Later I'll use property files.
-		/*
-		 * try { properties = new Properties();
-		 * properties.load(this.getClass().getClassLoader()
-		 * .getResourceAsStream("./config/universaldx.properties")); } catch
-		 * (Exception e) {
-		 * Logging.info(" The file universaldx.properties doesn't exist.");
-		 * e.printStackTrace(); System.exit(-1); }
-		 */
+
+		try {
+			properties = new Properties();
+			FileInputStream fis = new FileInputStream(
+					"./resources/config/universaldx.properties");
+			properties.load(fis);
+		} catch (Exception e) {
+			Logging.info(" The file universaldx.properties doesn't exist.");
+			System.exit(-1);
+		}
+
+		baseFolder = properties.getProperty("baseFolder");
 
 		// Create the connection to the RServer
 		c = new RConnection();
@@ -48,8 +54,8 @@ public class RClassifier {
 		try {
 			loadLibrary();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logging.info("The R custom library hasn't been loaded.");
+			System.exit(-1);
 		}
 
 		Logging.info(getHeader() + "Class loaded.");
@@ -66,12 +72,11 @@ public class RClassifier {
 			REXPMismatchException {
 		Logging.info(getHeader() + "Loading my R library.");
 		// Setting the name of the my R library
-		String file = FileUtils
-				.readFile("/home/adsuar/workspace/trabajo/UniversalDX/resources/R/RClassifier.R");
+		String file = FileUtils.readFile(baseFolder
+				+ "/resources/R/RClassifier.R");
 
 		// Setting the name of the file where corpus is stored in R
-		c.assign("corpusFile",
-				"/home/adsuar/workspace/trabajo/UniversalDX/resources/data/leaf.csv");
+		c.assign("corpusFile", baseFolder + "/resources/data/leaf.csv");
 
 		System.out.println("Corpus File Name stated");
 		// System.out.println(c.eval("corpusFile").asString());
@@ -90,7 +95,7 @@ public class RClassifier {
 	public void loadData() throws RserveException, REXPMismatchException {
 		Logging.info(getHeader() + "Loading corpus data.");
 
-		REXP x = c.eval("corpus <- loadCorpus(corpusFile)");
+		c.eval("corpus <- loadCorpus(corpusFile)");
 
 		Logging.info(getHeader() + "Corpus data loaded.");
 	}
@@ -104,7 +109,7 @@ public class RClassifier {
 	public void trainClassifier() throws RserveException, REXPMismatchException {
 		Logging.info(getHeader() + "Training classifier.");
 
-		REXP x = c.eval("trained <- trainClassifier(corpus)");
+		c.eval("trained <- trainClassifier(corpus)");
 
 		Logging.info(getHeader() + "Classifier trained.");
 	}
@@ -115,32 +120,34 @@ public class RClassifier {
 	 * @throws RserveException
 	 * @throws REXPMismatchException
 	 */
-	public void classifyNewEntry(List<Double> objectToClassify)
-			throws RserveException, REXPMismatchException {
+	public void classifyNewEntry() throws RserveException,
+			REXPMismatchException {
 		Logging.info(getHeader() + "Classify a new entry.");
 
-		/*
-		 * PrintWriter out = null;
+		REXP x = c.eval("testCorpus <- loadCorpus(\"" + baseFolder
+				+ "/resources/data/test.csv\")");
+
+		x = c.eval("dim(testCorpus)");
+		
+		REXP y = c.eval("dim(corpus)");
+		
+		if(Integer.parseInt(x.asStrings()[1]) > (Integer.parseInt(y.asStrings()[1]) - 1)) {
+			System.err.println("The test corpus has more columns than the training set.");
+			throw new RserveException(c,"The test corpus has more columns than the training set.");
+		}
+		
+		/**
+		 * As it is stated at the naiveBayes help, note that the column names
+		 * of ‘newdata’ are matched against the training data ones.".
 		 * 
-		 * try { out = new PrintWriter(
-		 * "/home/adsuar/workspace/trabajo/UniversalDX/resources/data/test.csv"
-		 * ); } catch (FileNotFoundException e) { // TODO Auto-generated catch
-		 * block e.printStackTrace(); }
-		 * 
-		 * out.println(RUtils.List2RCSV(objectToClassify));
-		 * 
-		 * out.close();
+		 * Thus, we have to preserve the names.
 		 */
-
-		REXP x = c
-				.eval("testCorpus <- loadCorpus(\"/home/adsuar/workspace/trabajo/UniversalDX/resources/data/test.csv\")");
-
-		x = c.eval("prediction <- classify(trained,testCorpus[,-1])");
-		x = c.eval("prediction");
+		c.eval("colnames(testCorpus) <- c('V2','V3','V4','V5','V6','V7','V8','V9','V10','V11','V12','V13','V14','V15','V16')");
+		x = c.eval("classify(trained,testCorpus[,])");
 
 		for (int factor = 0; factor < x.asFactor().size(); factor++) {
-			System.out.println("LA PREDICCIÓN PARA LA ENTRADA " + factor
-					+ " ES " + x.asFactor().at(factor));
+			Logging.info("The prediction for the entry #" + factor + " is "
+					+ x.asFactor().at(factor));
 		}
 
 		Logging.info(getHeader() + "New entry classified.");
@@ -165,54 +172,58 @@ public class RClassifier {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
 		RClassifier rc = null;
+
+		/**
+		 * We establish the connection.
+		 */
 		try {
 			rc = new RClassifier();
 		} catch (RserveException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 			System.err.println("The connection hasn't been stablished.");
 			System.exit(-1);
 		} catch (REXPMismatchException e) {
-			// TODO Auto-generated catch block
 			System.err.println("The connection hasn't been stablished.");
 			System.exit(-1);
 		}
 
+		/**
+		 * We load the corpus into the environment.
+		 */
 		try {
 			rc.loadData();
 		} catch (RserveException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("The corpus data hasn't been loaded.");
+			System.exit(-1);
 		} catch (REXPMismatchException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("The corpus data hasn't been loaded.");
+			System.exit(-1);
 		}
 
+		/**
+		 * We train the Naive Bayes classifier.
+		 */
 		try {
 			rc.trainClassifier();
 		} catch (RserveException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("The classifier hasn't been trained.");
+			System.exit(-1);
 		} catch (REXPMismatchException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("The classifier hasn't been trained.");
+			System.exit(-1);
 		}
 
-		List<Double> objectToClassify = Arrays.asList(6.0, 0.58232, 1.343,
-				0.29271, 0.95055, 0.99825, 0.71499, 0.026876, 0.13146,
-				0.068134, 0.13204, 0.017136, 0.0036798, 0.0014697, 1.6315);
-
+		/**
+		 * We make a prediction about the a new set of candidates.
+		 */
 		try {
-			rc.classifyNewEntry(objectToClassify);
+			rc.classifyNewEntry();
 		} catch (RserveException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("The prediction hasn't been done.");
+			System.exit(-1);
 		} catch (REXPMismatchException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.err.println("The prediction hasn't been done.");
+			System.exit(-1);
 		}
 	}
 }

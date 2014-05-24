@@ -1,0 +1,57 @@
+<project name="UniversalDX" default="help" basedir=".">
+	<!-- Define the properties used by the build -->
+	<property name="app.name" value="UniversalDX" />
+	<property name="libs.home" value="${basedir}/lib" />
+	<property name="dist.home" value="${basedir}/dist" />
+	<property name="src.home" value="${basedir}/src" />
+
+	<target name="help">
+		<echo>You can use the following targets:</echo>
+		<echo>
+		</echo>
+		<echo>  help    : (default) Prints this message </echo>
+		<echo>  all     : Cleans, compiles, and packages application</echo>
+		<echo>  clean   : Deletes work directories</echo>
+		<echo>  compile : Compiles servlets into class files</echo>
+		<echo>  dist    : Packages artifacts into a deployable WAR</echo>
+		<echo>
+		</echo>
+		<echo>For example, to clean, compile, and package all at once, run:</echo>
+		<echo>prompt> ant all </echo>
+	</target>
+
+	<!-- Define the CLASSPATH -->
+	<path id="compile.classpath">
+		<fileset dir="${libs.home}">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement location="${libs.home}" />
+	</path>
+
+	<target name="all" depends="clean,compile,dist,run" description="Clean work dirs, then compile and create a WAR" />
+
+	<target name="clean" description="Delete old work and dist directories">
+		<delete dir="${dist.home}" />
+	</target>
+
+	<target name="prepare" depends="clean" description="Create working dirs and copy static files to work dir">
+		<mkdir dir="${dist.home}" />
+	</target>
+
+	<target name="compile" depends="prepare" description="Compile Java sources and copy to WEB-INF/classes dir">
+		<javac srcdir="${src.home}" destdir="${dist.home}/">
+			<classpath refid="compile.classpath" />
+		</javac>
+	</target>
+
+	<target name="dist" depends="compile" description="Create JAR file for binary distribution">
+		<jar jarfile="${dist.home}/${app.name}.jar" basedir="${dist.home}" />
+	</target>
+
+	<target name="run" depends="dist" description="Executes the training and classification.">
+		<java classname="es.adsuar.universaldx.RClassifier" classpath="./dist" fork="true" taskname="java1.6">
+			<classpath refid="compile.classpath" />
+		</java>
+	</target>
+
+</project>
