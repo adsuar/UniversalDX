@@ -10,7 +10,7 @@ loadCorpus <- function(fileName) {
 # Function that trains the Naive Bayes classifier
 trainClassifierNB <- function(corpus) {
    # The class column should be categorical, not numeric.
-   classifier <- naiveBayes(corpus[,2:16],as.factor(corpus[,1]))
+   classifier <- naiveBayes(corpus[,-1],as.factor(corpus[,1]))
    return(classifier)
 }
 
@@ -19,7 +19,7 @@ trainClassifierSVM <- function(corpus) {
    # The class column should be categorical, not numeric.
    # Poor performance
    # classifier <- svm(corpus[,2:16],as.factor(corpus[,1]))
-   classifier <- svm(corpus[,2:16],as.factor(corpus[,1]),type="nu-classification",nu = 0.2)
+   classifier <- svm(corpus[,-1],as.factor(corpus[,1]),type="nu-classification",nu = 0.2)
    return(classifier)
 }
 
