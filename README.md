@@ -25,6 +25,8 @@ In resources/R/packages.R we can find the different packages that we need to ins
 Rserve Launch
 =============
 
+The different ways for launching the RServe process that I've tested to make this task have been the following ones:
+
 1) R CMD Rserve
 2) library(Rserve) 
    Rserve()
@@ -44,6 +46,8 @@ NOTE: With the current test data, we can see a poor performance of SVM versus Na
 R Source Code
 =============
 
-Instead of creating two functions that trained the classifier in one hand, and predicted the result on the other hand, I've developed a third function focused on loading data, so I could reuse such functionality whenever were needed.
+Instead of creating just two functions that trained the classifier in one hand, and predicted the result on the other hand, I've developed a third function focused on loading data, so I could reuse such functionality whenever were needed.
 
-I have taken advantage of the fact that while the connection is opened, no data is lost (the session data is stored) so I can develop more light functions.
+I have taken advantage of the fact that while the connection is opened, no data is lost (the session data is stored) so I can develop lighter functions.
+
+The code is at: resources/R/RClassifier.R
