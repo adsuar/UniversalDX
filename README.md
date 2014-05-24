@@ -39,3 +39,5 @@ R Source Code
 =============
 
 Instead of creating two functions that trained the classifier in one hand, and predicted the result on the other hand, I've developed a third function focused on loading data, so I could reuse such functionality whenever were needed.
+
+I have taken advantage of the fact that while the connection is opened, no data is lost (the session data is stored) so I can develop more light functions.
