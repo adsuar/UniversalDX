@@ -26,15 +26,18 @@ public class RClassifier {
 
 	// Base Folder
 	private String baseFolder;
-	
+
 	// Input training data
 	private String inputTrainingData;
-	
+
 	// Test data
 	private String testData;
 
 	// R Library
 	private String RLibrary;
+
+	// Class position
+	private Integer cPosition;
 
 	// Classifier to apply
 	private CLASSIFIER classifier;
@@ -65,6 +68,13 @@ public class RClassifier {
 		testData = properties.getProperty("testData");
 		RLibrary = properties.getProperty("RLibrary");
 
+		// The default cPosition is 1
+		if (properties.getProperty("cPosition") == null
+				|| properties.getProperty("cPosition").length() == 0)
+			cPosition = 1;
+		else
+			cPosition = Integer.parseInt(properties.getProperty("cPosition"));
+
 		// Create the connection to the RServer
 		c = new RConnection();
 
@@ -94,8 +104,7 @@ public class RClassifier {
 			REXPMismatchException {
 		Logging.info(getHeader() + "Loading my R library.");
 		// Setting the name of the my R library
-		String file = FileUtils.readFile(baseFolder
-				+ RLibrary);
+		String file = FileUtils.readFile(baseFolder + RLibrary);
 
 		// Setting the name of the file where corpus is stored in R
 		c.assign("corpusFile", baseFolder + inputTrainingData);
@@ -134,15 +143,15 @@ public class RClassifier {
 		switch (classifier) {
 		case NB:
 			Logging.info(getHeader() + " Training made with NB classifier.");
-			c.eval("trained <- trainClassifierNB(corpus)");
+			c.eval("trained <- trainClassifierNB(corpus," + cPosition + ")");
 			break;
 		case SVM:
 			Logging.info(getHeader() + " Training made with SVM classifier.");
-			c.eval("trained <- trainClassifierSVM(corpus)");
+			c.eval("trained <- trainClassifierSVM(corpus," + cPosition + ")");
 			break;
 		default:
 			Logging.info(getHeader() + " Training made with NB classifier.");
-			c.eval("trained <- trainClassifierNB(corpus)");
+			c.eval("trained <- trainClassifierNB(corpus," + cPosition + ")");
 			break;
 		}
 
@@ -159,8 +168,8 @@ public class RClassifier {
 			REXPMismatchException {
 		Logging.info(getHeader() + "Classify a new entry.");
 
-		REXP x = c.eval("testCorpus <- loadCorpus(\"" + baseFolder
-				+ testData + "\")");
+		REXP x = c.eval("testCorpus <- loadCorpus(\"" + baseFolder + testData
+				+ "\")");
 
 		x = c.eval("dim(testCorpus)");
 
@@ -174,13 +183,31 @@ public class RClassifier {
 					"The test corpus has more columns than the training set.");
 		}
 
+		// Maximum number of columns
+		int maxSize = Integer.parseInt(y.asStrings()[1]);
+
 		/**
 		 * As it is stated at the naiveBayes help, note that the column names of
 		 * ‘newdata’ are matched against the training data ones.".
 		 * 
 		 * Thus, we have to preserve the names.
 		 */
-		c.eval("colnames(testCorpus) <- c('V2','V3','V4','V5','V6','V7','V8','V9','V10','V11','V12','V13','V14','V15','V16')");
+		
+		// We get the name the name of the columns from the training data set
+		// that will be used at the prediction.
+		String columns = "";
+		for(int i=1;i <= maxSize;i++) {
+			if(i != cPosition) {
+				if(columns.length() != 0)
+					columns += ",";
+				columns += "'V" + i + "'";
+			}
+		}
+		
+		Logging.info(getHeader() + "The columns to be used are: " + columns);
+
+		// We set which will be the names of the columns
+		c.eval("colnames(testCorpus) <- c(" + columns + ")");
 		x = c.eval("classify(trained,testCorpus[,])");
 
 		for (int factor = 0; factor < x.asFactor().size(); factor++) {

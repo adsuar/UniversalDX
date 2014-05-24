@@ -3,11 +3,16 @@ UniversalDX
 
 Task developed for the job position process.
 
-REQUIREMENTS
+Requirements
 ============
 
 OS: Linux
 JVM: 1.6
+
+Training Data
+=============
+
+I've used the Leaf Data Set to train the classifier. Such data set is stored at resources/data/leaf.csv.
 
 Packages to Install
 ===================
@@ -32,8 +37,9 @@ a) Execution with Naive Bayes classifier: ant runNB
 b) Execution with Support Vector Machines classifier: ant runSVM
 c) Default execution (with the Naive Bayes classifier): ant run
 
+At resources/config/universaldx.properties you can define which will be the training data set and the test data set. Furthermore, you can set the column in which the class will be stored at the training data set, so you can change the training set easily.
 
-NOTE: With the current test data, we can see a poor performance of SVM versus Naive Bayes (if type is C-classification of is nu-classification an the value of nu is for example 0.5) since the data used is stored as is in the training set and the predictions of SVM are wrong.
+NOTE: With the current test data, we can see a poor performance of SVM versus Naive Bayes (if type is C-classification of is nu-classification and the value of nu is for example 0.5) since the data used is stored as is in the training set and the predictions of SVM are wrong.
 
 R Source Code
 =============
